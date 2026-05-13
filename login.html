@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TalkMate AI Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            background: radial-gradient(circle at top, #0f172a, #020617);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-box {
+            position: relative;
+            width: 340px;
+            padding: 40px;
+            background: rgba(1, 15, 39, 0.755);
+            border: 1px solid rgb(255, 166, 0);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            box-shadow: 0 0 40px rgb(255, 255, 0);
+            text-align: center;
+        }
+
+        .bot-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgb(241, 241, 99);
+            border-radius: 8px;
+            background: rgb(0, 13, 36);
+            color: white;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(90deg, #00f5ff, #7c3aed);
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            transform: scale(1.02);
+        }
+
+        .error {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #ff6b6b;
+        }
+
+        .signup-btn {
+            background: linear-gradient(90deg, #2D6A4F, #1F543E);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <img src="https://i.pinimg.com/736x/b2/06/40/b206406f9f1a808adee08458e8220366.jpg" alt="Bot" class="bot-image">
+        <h2>TalkMate AI</h2>
+        
+        <div class="input-group">
+            <input type="text" id="username" placeholder="Username">
+        </div>
+        
+        <div class="input-group">
+            <input type="password" id="password" placeholder="Password">
+        </div>
+        
+        <button onclick="login()">Login</button>
+        <button class="signup-btn" onclick="signup()">Sign Up</button>
+        
+        <div id="error" class="error"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://127.0.0.1:8001';
+
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('error');
+
+            if (!username || !password) {
+                errorDiv.innerText = 'Please enter username and password';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    localStorage.setItem('user_id', data.user.id);
+                    localStorage.setItem('username', data.user.username);
+                    localStorage.setItem('isLoggedIn', 'true');
+                    window.location.href = 'index.html';
+                } else {
+                    errorDiv.innerText = data.message || 'Login failed';
+                }
+            } catch (error) {
+                errorDiv.innerText = 'Cannot connect to backend. Make sure it\'s running on port 8001';
+            }
+        }
+
+        async function signup() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('error');
+
+            if (!username || !password) {
+                errorDiv.innerText = 'Please enter username and password';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/signup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    alert('Signup successful! Please login.');
+                    document.getElementById('username').value = '';
+                    document.getElementById('password').value = '';
+                    errorDiv.innerText = '';
+                } else {
+                    errorDiv.innerText = data.message || 'Signup failed';
+                }
+            } catch (error) {
+                errorDiv.innerText = 'Cannot connect to backend';
+            }
+        }
+    </script>
+</body>
+</html>

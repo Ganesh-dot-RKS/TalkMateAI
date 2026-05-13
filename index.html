@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <!-- CRITICAL FIX: Remove any meta refresh tags -->
+    <!-- CRITICAL FIX: Prevent bfcache from restoring old state -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Talkmate AI | Grammar Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f0f7ff 0%, #e9f0fa 100%);
+            font-family: 'Inter', sans-serif;
+            padding: 2rem 1.5rem;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .talkmate-card {
+            max-width: 1100px;
+            width: 100%;
+            margin: 0 auto;
+            background: #fefcfc;
+            border-radius: 2.5rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .ai-header {
+            background: #010635;
+            padding: 1.8rem 2rem;
+            color: #F8FAFC;
+        }
+
+        .ai-header h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bot-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+
+        .content-panel {
+            padding: 2rem;
+        }
+
+        .user-sentence-box, .corrected-area {
+            border-radius: 1.5rem;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .user-sentence-box {
+            background: #fff8db;
+            border: 2px solid #8b8200d2;
+        }
+
+        .corrected-area {
+            background: #e8fff5;
+            border: 2px solid #10B981;
+        }
+
+        .user-label, .corrected-title {
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-label {
+            color: #095834e9;
+        }
+
+        .corrected-title {
+            color: #1ca1ff;
+        }
+
+        .user-sentence-text, .corrected-sentence {
+            font-size: 1.2rem;
+            font-weight: 500;
+            line-height: 1.4;
+            word-break: break-word;
+            min-height: 60px;
+        }
+
+        .user-sentence-text {
+            color: #765501d6;
+        }
+
+        .corrected-sentence {
+            color: #1F3B2C;
+        }
+
+        .explanation-box {
+            background: #e8fff5;
+            border-radius: 1rem;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #2D6A4F;
+            border-right: 4px solid #2D6A4F;
+            color: #2C4A3B;
+        }
+
+        .vocab-section {
+            margin-bottom: 2rem;
+        }
+
+        .vocab-section h3 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: #1ca1ff;
+        }
+
+        .vocab-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+        }
+
+        .vocab-card {
+            flex: 1;
+            min-width: 160px;
+            background: white;
+            border-radius: 1.25rem;
+            padding: 1.2rem 1rem;
+            border: 1px solid #308af8;
+            transition: transform 0.2s ease;
+        }
+
+        .vocab-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .word {
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            color: #1E3A5F;
+        }
+
+        .pos {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            background: #EFF3F8;
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 30px;
+            margin-left: 8px;
+        }
+
+        .definition {
+            font-size: 0.85rem;
+            color: #4A5B6E;
+            margin-top: 8px;
+        }
+
+        .synonyms {
+            font-size: 0.75rem;
+            color: #6B8C5C;
+            margin-top: 6px;
+            font-style: italic;
+        }
+
+        .input-section {
+            background: #98a2ff;
+            border-radius: 1.8rem;
+            padding: 1.2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .input-wrapper {
+            flex: 4;
+            position: relative;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 14px 18px;
+            font-size: 1rem;
+            border: 1px solid #CDDFE7;
+            border-radius: 60px;
+            background: white;
+            outline: none;
+        }
+
+        .validation-message {
+            font-size: 0.75rem;
+            margin-top: 6px;
+            margin-left: 18px;
+            color: #DC2626;
+            display: none;
+        }
+
+        .validation-message.show {
+            display: block;
+        }
+
+        .mic-btn, .improve-btn, .clear-btn, .audio-btn {
+            border: none;
+            background: white;
+            border-radius: 60px;
+            padding: 12px 20px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mic-btn {
+            background: #F1F5F9;
+            color: #2C3E66;
+        }
+
+        .improve-btn {
+            background: #2D6A4F;
+            color: white;
+        }
+
+        .clear-btn {
+            background: #FEF3E2;
+            color: #B45F06;
+        }
+
+        .audio-btn {
+            background: #E0E7FF;
+            color: #3730A3;
+        }
+
+        .status-badge {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+
+        .status-online {
+            background-color: #10B981;
+            box-shadow: 0 0 5px #10B981;
+        }
+
+        .status-offline {
+            background-color: #EF4444;
+        }
+
+        #historyToggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        #historyPanel {
+            position: fixed;
+            top: 60px;
+            right: 20px;
+            width: 300px;
+            max-height: 400px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            overflow-y: auto;
+            display: none;
+            z-index: 1000;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: #007BFF;
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .history-item {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        .logout-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #DC2626;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            z-index: 1000;
+            font-weight: 600;
+        }
+
+        .placeholder-text {
+            color: #3f432a;
+            font-style: italic;
+            font-weight: 400;
+        }
+
+        @media (max-width: 700px) {
+            .content-panel {
+                padding: 1.5rem;
+            }
+            .vocab-grid {
+                flex-direction: column;
+            }
+            .input-section {
+                flex-wrap: wrap;
+            }
+            .mic-btn, .improve-btn, .clear-btn, .audio-btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+        
+        /* DEBUG: Add visual indicator if page reloads */
+        .reload-detected {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: red;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+    <button id="historyToggle" onclick="toggleHistoryPanel()">📜 History</button>
+
+    <div class="talkmate-card">
+        <div class="ai-header">
+            <h1>
+                <img src="https://i.pinimg.com/736x/b2/06/40/b206406f9f1a808adee08458e8220366.jpg" alt="Bot" class="bot-image">
+                TalkMate AI
+                <span id="apiStatus" class="status-badge status-offline"></span>
+            </h1>
+            <p>Speak or type a sentence, and I'll help you improve it.</p>
+        </div>
+
+        <div class="content-panel">
+            <div class="user-sentence-box">
+                <div class="user-label">
+                    <i class="fas fa-user-circle"></i> YOU
+                </div>
+                <div class="user-sentence-text" id="userSentenceDisplay">
+                    <span class="placeholder-text">— your sentence will appear here —</span>
+                </div>
+            </div>
+
+            <div class="corrected-area">
+                <div class="corrected-title">
+                    <i class="fas fa-magic"></i> Corrected Sentence
+                    <button id="audioPlayBtn" class="audio-btn" style="padding: 4px 12px; margin-left: auto;">
+                        <i class="fas fa-volume-up"></i> Listen
+                    </button>
+                </div>
+                <div class="corrected-sentence" id="correctedSentenceDisplay">
+                    <span class="placeholder-text">click "Improve" after typing</span>
+                </div>
+            </div>
+
+            <div class="explanation-box" id="explanationDisplay">
+                <i class="fas fa-lightbulb"></i> Feedback will appear here after API response.
+            </div>
+
+            <div class="vocab-section">
+                <h3><i class="fas fa-book-open"></i> Vocabulary Suggestions</h3>
+                <div class="vocab-grid" id="vocabGrid">
+                    <div class="vocab-card">
+                        <div><span class="word">—</span><span class="pos">waiting</span></div>
+                        <div class="definition">Vocabulary will appear after improvement</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <div class="input-wrapper">
+                    <input type="text" id="sentenceInput" placeholder="Type your sentence here...">
+                    <div class="validation-message" id="validationMessage">
+                        <i class="fas fa-exclamation-circle"></i> Please enter a sentence (minimum 3 characters)
+                    </div>
+                </div>
+                <button class="mic-btn" id="micButton" type="button"><i class="fas fa-microphone"></i></button>
+                <button class="improve-btn" id="improveBtn" type="button"><i class="fas fa-arrow-right"></i> Improve</button>
+                <button class="clear-btn" id="clearBtn" type="button"><i class="fas fa-trash-alt"></i> Clear</button>
+            </div>
+
+            <div id="historyPanel">
+                <div class="history-header">
+                    <span>📜 History</span>
+                    <button onclick="clearHistory()">Clear</button>
+                </div>
+                <div id="history"></div>
+            </div>
+
+            <div class="footer-note">
+                <i class="fas fa-microphone-alt"></i> Or tap the mic and speak your sentence
+            </div>
+        </div>
+    </div>
+
+    <!-- DEBUG: Reload detection indicator -->
+    <div id="reloadDetector" class="reload-detected" style="display: none;">⚠️ Page Reloaded!</div>
+
+    <script>
+        // ============================================
+        // TALK MATE AI - COMPLETE DEBUG VERSION
+        // ============================================
+        
+        // DEBUG: Detect and log any page reloads
+        (function detectReload() {
+            // Check if this is a fresh load or bfcache restore
+            if (performance.navigation.type === 1 || document.visibilityState === 'visible') {
+                console.log('🔄 Page loaded/reloaded at:', new Date().toLocaleTimeString());
+                
+                // Show reload indicator temporarily
+                const reloadIndicator = document.getElementById('reloadDetector');
+                if (reloadIndicator) {
+                    reloadIndicator.style.display = 'block';
+                    setTimeout(() => {
+                        reloadIndicator.style.display = 'none';
+                    }, 3000);
+                }
+            }
+            
+            // Prevent bfcache from restoring old state
+            window.addEventListener('pageshow', function(event) {
+                if (event.persisted) {
+                    console.log('⚠️ Page restored from bfcache - forcing reload of data');
+                    // Reload the current page data without full reload
+                    loadUserData();
+                }
+            });
+        })();
+
+        const API_BASE_URL = 'http://127.0.0.1:8001';
+
+        // DOM Elements
+        let sentenceInput, userSentenceDisplay, correctedSentenceDisplay,
+            explanationDisplay, improveBtn, micBtn, clearBtn,
+            audioPlayBtn, validationMsg, vocabGrid, apiStatusIndicator;
+
+        let isProcessing = false;
+        let currentAudioBase64 = null;
+        
+        // Store last successful results to survive bfcache
+        let lastResults = null;
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function (m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        // Save results to sessionStorage for recovery
+        function saveResultsToStorage(data) {
+            if (data) {
+                sessionStorage.setItem('lastGrammarResults', JSON.stringify(data));
+                lastResults = data;
+            }
+        }
+        
+        // Load results from storage (for bfcache recovery)
+        function loadResultsFromStorage() {
+            const saved = sessionStorage.getItem('lastGrammarResults');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    displayResults(data);
+                    console.log('✅ Recovered saved results from storage');
+                } catch(e) {
+                    console.error('Failed to recover saved results:', e);
+                }
+            }
+        }
+        
+        // Load user data and restore state
+        function loadUserData() {
+            const savedSentence = sessionStorage.getItem('lastUserSentence');
+            if (savedSentence) {
+                sentenceInput.value = savedSentence;
+                userSentenceDisplay.innerHTML = escapeHtml(savedSentence);
+            }
+            loadResultsFromStorage();
+        }
+
+        async function checkAPIHealth() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/`);
+                apiStatusIndicator.className = response.ok
+                    ? 'status-badge status-online'
+                    : 'status-badge status-offline';
+            } catch {
+                apiStatusIndicator.className = 'status-badge status-offline';
+            }
+        }
+
+        function displayResults(data) {
+            console.log('📝 Displaying results:', data);
+            
+            if (data.corrected) {
+                correctedSentenceDisplay.innerHTML = escapeHtml(data.corrected);
+            }
+            if (data.explanation) {
+                explanationDisplay.innerHTML = `<i class="fas fa-lightbulb"></i> ${escapeHtml(data.explanation)}`;
+            }
+            if (data.vocabulary && data.vocabulary.length > 0) {
+                vocabGrid.innerHTML = data.vocabulary.map(item => `
+                    <div class="vocab-card">
+                        <div>
+                            <span class="word">${escapeHtml(item.word)}</span>
+                            <span class="pos">${escapeHtml(item.pos)}</span>
+                        </div>
+                        <div class="definition">${escapeHtml(item.definition)}</div>
+                        ${item.synonyms ? `<div class="synonyms"><i class="fas fa-exchange-alt"></i> ${escapeHtml(item.synonyms)}</div>` : ''}
+                    </div>
+                `).join('');
+            }
+            if (data.audio_base64) {
+                currentAudioBase64 = data.audio_base64;
+                audioPlayBtn.disabled = false;
+            }
+            
+            // Save to storage for recovery
+            saveResultsToStorage(data);
+        }
+
+        function playAudioFromBase64(base64Audio) {
+            if (!base64Audio) return;
+            try {
+                const byteCharacters = atob(base64Audio);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const audioBlob = new Blob([new Uint8Array(byteNumbers)], { type: 'audio/mpeg' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audio = new Audio(audioUrl);
+                audio.play();
+                audio.onended = () => URL.revokeObjectURL(audioUrl);
+            } catch (error) {
+                console.error('Audio error:', error);
+            }
+        }
+
+        async function improveSentence() {
+            console.log('🎯 Improve button clicked - processing started');
+            
+            if (isProcessing) {
+                console.log('⏳ Already processing, ignoring duplicate click');
+                return;
+            }
+
+            const sentence = sentenceInput.value.trim();
+
+            if (!sentence || sentence.length < 3) {
+                validationMsg.classList.add('show');
+                validationMsg.innerHTML = sentence
+                    ? '<i class="fas fa-exclamation-circle"></i> Sentence must be at least 3 characters'
+                    : '<i class="fas fa-exclamation-circle"></i> Please enter a sentence';
+                console.log('❌ Validation failed:', sentence);
+                return;
+            }
+
+            validationMsg.classList.remove('show');
+            userSentenceDisplay.innerHTML = escapeHtml(sentence);
+            
+            // Save sentence to storage
+            sessionStorage.setItem('lastUserSentence', sentence);
+
+            // Lock UI
+            isProcessing = true;
+            improveBtn.disabled = true;
+            micBtn.disabled = true;
+            audioPlayBtn.disabled = true;
+            currentAudioBase64 = null;
+            const originalBtnHTML = improveBtn.innerHTML;
+            improveBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Processing...';
+
+            // Show loading placeholders
+            correctedSentenceDisplay.innerHTML = '<span class="placeholder-text"><i class="fas fa-spinner fa-pulse"></i> Processing...</span>';
+            explanationDisplay.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Analyzing grammar...';
+            vocabGrid.innerHTML = '<div class="vocab-card"><div><span class="word">—</span><span class="pos">loading</span></div><div class="definition"><i class="fas fa-spinner fa-pulse"></i> Fetching vocabulary...</div></div>';
+
+            try {
+                const user_id = localStorage.getItem('user_id');
+                if (!user_id) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                console.log('📡 Sending request to API...');
+                const response = await fetch(`${API_BASE_URL}/grammar/check?user_id=${user_id}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: sentence })
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const result = await response.json();
+                console.log('✅ API response received:', result);
+                displayResults(result);
+
+            } catch (error) {
+                console.error('❌ API Error:', error);
+                correctedSentenceDisplay.innerHTML = '<span class="placeholder-text">⚠️ Error connecting to server</span>';
+                explanationDisplay.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Cannot connect to backend on port 8001';
+            } finally {
+                isProcessing = false;
+                improveBtn.disabled = false;
+                micBtn.disabled = false;
+                improveBtn.innerHTML = originalBtnHTML;
+                console.log('🔓 UI unlocked - ready for next request');
+            }
+        }
+
+        function clearAll() {
+            console.log('🗑️ Clear button clicked');
+            sentenceInput.value = '';
+            userSentenceDisplay.innerHTML = '<span class="placeholder-text">— your sentence will appear here —</span>';
+            correctedSentenceDisplay.innerHTML = '<span class="placeholder-text">click "Improve" after typing</span>';
+            explanationDisplay.innerHTML = '<i class="fas fa-lightbulb"></i> Feedback will appear here after API response.';
+            vocabGrid.innerHTML = '<div class="vocab-card"><div><span class="word">—</span><span class="pos">ready</span></div><div class="definition">Vocabulary will appear after improvement</div></div>';
+            validationMsg.classList.remove('show');
+            currentAudioBase64 = null;
+            audioPlayBtn.disabled = true;
+            sentenceInput.focus();
+            
+            // Clear saved data
+            sessionStorage.removeItem('lastUserSentence');
+            sessionStorage.removeItem('lastGrammarResults');
+            lastResults = null;
+        }
+
+        function logout() {
+            localStorage.clear();
+            sessionStorage.clear(); // Also clear session storage on logout
+            window.location.href = 'login.html';
+        }
+
+        async function loadHistory() {
+            const user_id = localStorage.getItem('user_id');
+            if (!user_id) return;
+            try {
+                const response = await fetch(`${API_BASE_URL}/history/${user_id}`);
+                const data = await response.json();
+                const historyDiv = document.getElementById('history');
+                if (historyDiv && Array.isArray(data)) {
+                    historyDiv.innerHTML = data.length === 0
+                        ? '<p style="padding:10px;">No history found</p>'
+                        : data.map(item => `
+                            <div class="history-item">
+                                <p><b>Input:</b> ${escapeHtml(item.user_text)}</p>
+                                <p><b>Corrected:</b> ${escapeHtml(item.corrected_text)}</p>
+                                <hr/>
+                            </div>`).join('');
+                }
+            } catch (error) {
+                console.error('History error:', error);
+            }
+        }
+
+        async function clearHistory() {
+            const user_id = localStorage.getItem('user_id');
+            if (!user_id) return;
+            await fetch(`${API_BASE_URL}/history/${user_id}`, { method: 'DELETE' });
+            loadHistory();
+        }
+
+        function toggleHistoryPanel() {
+            const panel = document.getElementById('historyPanel');
+            if (panel.style.display === 'none' || panel.style.display === '') {
+                panel.style.display = 'block';
+                loadHistory();
+            } else {
+                panel.style.display = 'none';
+            }
+        }
+
+        function startVoiceInput() {
+            if (isProcessing) {
+                alert('Please wait for current request to finish...');
+                return;
+            }
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert('Speech recognition not supported in this browser');
+                return;
+            }
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+
+            micBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i>';
+            micBtn.disabled = true;
+
+            recognition.start();
+
+            recognition.onresult = (event) => {
+                const text = event.results[0][0].transcript;
+                sentenceInput.value = text.charAt(0).toUpperCase() + text.slice(1);
+                micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                micBtn.disabled = false;
+                improveSentence();
+            };
+
+            recognition.onerror = () => {
+                micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                micBtn.disabled = false;
+                alert('Could not recognize speech. Please type your sentence.');
+            };
+        }
+
+        function checkAuth() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const user_id = localStorage.getItem('user_id');
+            if (isLoggedIn !== 'true' || !user_id) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            return true;
+        }
+
+        function initEventListeners() {
+            improveBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                improveSentence();
+            });
+            
+            micBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                startVoiceInput();
+            });
+            
+            clearBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                clearAll();
+            });
+
+            audioPlayBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                if (currentAudioBase64) {
+                    playAudioFromBase64(currentAudioBase64);
+                } else {
+                    alert('No audio available. Please improve a sentence first.');
+                }
+            });
+
+            sentenceInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    improveSentence();
+                }
+            });
+        }
+
+        // DEBUG: Monitor for any unwanted reload attempts
+        window.addEventListener('beforeunload', function() {
+            console.log('⚠️ Page is about to unload/reload - checking for unwanted reloads');
+            // You can inspect what's causing the reload here
+            return null;
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('🚀 DOM fully loaded - initializing app');
+            
+            // Assign all DOM refs
+            sentenceInput = document.getElementById('sentenceInput');
+            userSentenceDisplay = document.getElementById('userSentenceDisplay');
+            correctedSentenceDisplay = document.getElementById('correctedSentenceDisplay');
+            explanationDisplay = document.getElementById('explanationDisplay');
+            improveBtn = document.getElementById('improveBtn');
+            micBtn = document.getElementById('micButton');
+            clearBtn = document.getElementById('clearBtn');
+            audioPlayBtn = document.getElementById('audioPlayBtn');
+            validationMsg = document.getElementById('validationMessage');
+            vocabGrid = document.getElementById('vocabGrid');
+            apiStatusIndicator = document.getElementById('apiStatus');
+
+            if (!checkAuth()) return;
+
+            // Try to restore previous state
+            loadUserData();
+
+            checkAPIHealth();
+            setInterval(checkAPIHealth, 30000);
+
+            initEventListeners();
+            
+            console.log('✅ App initialized successfully');
+        });
+    </script>
+</body>
+</html>
